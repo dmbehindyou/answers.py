@@ -1,6 +1,15 @@
-import requests
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
+
+bot = Bot(token="5111560786:AAGQImq62wzJPza68i5jsFzDnxQLSeYMXnk")
+dp = Dispatcher(bot)
 
 
-geocoder_request = f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode=Петровки, 38&format=json"
-response = requests.get(geocoder_request).json()
-print(response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"])
+@dp.message_handler()
+async def echo(message: types.Message):
+    await message.reply(f"Я получил сообщение <{message.text}>")
+
+
+if __name__ == '__main__':
+    executor.start_polling(dp)
