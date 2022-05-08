@@ -1,32 +1,18 @@
 import vk_api
-from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-import random
-import datetime
 
 
 def main():
-    vk_session = vk_api.VkApi(token=token)
-    longpoll = VkBotLongPoll(vk_session, 180690386)
-    for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW:
-            vk = vk_session.get_api()
-            flag = True
-            for i in ['время', 'число', 'дата', 'день']:
-                if i in event.obj.message['text']:
-                    resp = f"{datetime.datetime.now()} {datetime.datetime.now().strftime('%A')}"
-                    print(resp)
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=resp,
-                                     random_id=random.randint(0, 2 ** 64),
-                                     group_id=group_id)
-                    flag = False
-                    break
-            if flag:
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message="Напишите одно из следующих слов, чтобы "
-                                         "получить время по МСК: время, число, дата, день.",
-                                 random_id=random.randint(0, 2 ** 64),
-                                 group_id=group_id)
+    login, password = LOGIN, PASSWORD
+    vk_session = vk_api.VkApi(login, password)
+    try:
+        vk_session.auth(token_only=True)
+    except vk_api.AuthError as error_msg:
+        print(error_msg)
+        return
+    vk = vk_session.get_api()
+    res = vk.photos.get(album_id=ALBUM_ID, owner_id=OWNER_ID, photo_sizes=1)
+    for i in res['items']:
+        print(f"url: {i['sizes'][0]['url']}, высота: {i['sizes'][0]['height']}, ширина: {i['sizes'][0]['width']};")
 
 
 if __name__ == '__main__':
