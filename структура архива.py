@@ -10,12 +10,17 @@ def main():
         print(error_msg)
         return
     vk = vk_session.get_api()
-    # Используем метод wall.get
-    response = vk.wall.get(count=5)
+    answer = []
+    response = vk.friends.get(fields='bdate')
     if response['items']:
         for i in response['items']:
-            dt = str(datetime.datetime.fromtimestamp(i['date'])).split(' ')
-            print(f"{i['text']};\ndate: {dt[0]}, time: {dt[1]}")
+            if 'bdate' in i:
+                answer.append(f"{i['last_name']} {i['first_name']} {i['bdate']}")
+            else:
+                answer.append(f"{i['last_name']} {i['first_name']}")
+    answer.sort()
+    for people in answer:
+        print(people)
 
 
 if __name__ == '__main__':
