@@ -1,16 +1,26 @@
 import vk_api
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+import random
 
 
 def main():
-    login, password = LOGIN, PASSWORD
-    vk_session = vk_api.VkApi(login, password)
-    try:
-        vk_session.auth(token_only=True)
-    except vk_api.AuthError as error_msg:
-        print(error_msg)
-        return
-    upload = vk_api.VkUpload(vk_session)
-    upload.photo(['static/img/mars.jpg', 'static/img/смотри.png'], album_id=ALBUM_ID, group_id=GROUP_ID)
+    vk_session = vk_api.VkApi(token=TOKEN)
+    longpoll = VkBotLongPoll(vk_session, group_id)
+    for event in longpoll.listen():
+        if event.type == VkBotEventType.MESSAGE_NEW:
+            vk = vk_session.get_api()
+            response = vk.users.get(user_ids=event.obj.message['from_id'], fields='city')
+            print(response)
+            if 'city' in response[0]:
+                vk.messages.send(user_id=event.obj.message['from_id'],
+                                 message=f"Привет, {response[0]['first_name']}!\nКак поживает {response[0]['city']['title']}?",
+                                 random_id=random.randint(0, 2 ** 64),
+                                 group_id=group_id)
+            else:
+                vk.messages.send(user_id=event.obj.message['from_id'],
+                                 message=f"Привет, {response[0]['first_name']}!",
+                                 random_id=random.randint(0, 2 ** 64),
+                                 group_id=group_id)
 
 
 if __name__ == '__main__':
