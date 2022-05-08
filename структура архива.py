@@ -1,4 +1,4 @@
-import vk_api, datetime
+import vk_api
 
 
 def main():
