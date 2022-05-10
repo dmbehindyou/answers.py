@@ -1,75 +1,59 @@
-from flask import Flask, url_for, request, render_template
+from flask import Flask, url_for
 
 app = Flask(__name__)
 
 
-@app.route('/load_photo', methods=['POST', 'GET'])
-def sample_file_upload():
-    if request.method == 'GET':
-        return f'''<!doctype html>
-                        <html lang="en">
-                          <head>
-                            <meta charset="utf-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-                             <link rel="stylesheet"
-                             href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
-                             integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
-                             crossorigin="anonymous">
-                            <link rel="stylesheet" type="text/css" href="{url_for('static', filename='css/style.css')}" />
-                            <title>Отбор астронавтов</title>
-                            <style>
-                              h1, h3 {{
-                                text-align: auto;
-                              }}
-                            </style>
-                          </head>
-                          <body>
-                            <h1>Загрузка фотографии</h1>
-                            <h3>для участия в миссии</h3>
-                            <div>
-                              <form class="load_photo" method="post" enctype="multipart/form-data">
-                                 <div class="form-group">
-                                      <label for="photo">Выберите файл</label>
-                                      <img src="{url_for('static', filename='img/image.jpg')}" alt="Хе-хе, а картинки-то нет.">
-                                      <input type="file" class="form-control-file" id="photo" name="file">
-                                 </div>
-                                 <button type="submit" class="btn btn-primary">Отправить</button>
-                              </form>
+@app.route('/carousel')
+def image():
+    return f"""<!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                        <title>Пейзажи Марса</title>
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/css/bootstrap.min.css" integrity="sha512-T584yQ/tdRR5QwOpfvDfVQUidzfgc2339Lc8uBDtcp/wYu80d7jwBgAxbyMh0a9YM9F8N3tdErpFI8iaGx6x5g==" crossorigin="anonymous" referrerpolicy="no-referrer">
+                        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/js/bootstrap.min.js" integrity="sha512-UR25UO94eTnCVwjbXozyeVd6ZqpaAE9naiEUBK/A+QDbfSTQFhPGj5lOR6d8tsgbBk84Ggb5A3EkjsOgPRPcKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                      </head>
+                      <body>
+                        <p>Пейзажи Марса</p>
+                        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                          <ol class="carousel-indicators">
+                            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="4"></li>
+                          </ol>
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <img class="d-block w-100" src="{url_for('static', filename='img/mars1.jpg')}" alt="First slide">
                             </div>
-                          </body>
-                        </html>'''
-    elif request.method == 'POST':
-        f = request.files['file'].read()
-        fd = open("static/img/image.jpg", "wb")
-        fd.write(f)
-        fd.close()
-        return f'''<!doctype html>
-                                <html lang="en">
-                                  <head>
-                                    <meta charset="utf-8">
-                                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-                                     <link rel="stylesheet"
-                                     href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
-                                     integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
-                                     crossorigin="anonymous">
-                                    <link rel="stylesheet" type="text/css" href="{url_for('static', filename='css/style.css')}" />
-                                    <title>Отбор астронавтов</title>
-                                  </head>
-                                  <body>
-                                    <h1>Загрузка фотографии</h1>
-                                    <h3>для участия в миссии</h3>
-                                    <div>
-                                      <form class="load_photo" method="post" enctype="multipart/form-data">
-                                         <div class="form-group">
-                                              <label for="photo">Выберите файл</label>
-                                              <img src="{url_for('static', filename='img/image.jpg')}" alt="Хе-хе, а картинки-то нет.">
-                                              <input type="file" class="form-control-file" id="photo" name="file">
-                                         </div>
-                                         <button type="submit" class="btn btn-primary">Отправить</button>
-                                      </form>
-                                    </div>
-                                  </body>
-                                </html>'''
+                            <div class="carousel-item">
+                              <img class="d-block w-100" src="{url_for('static', filename='img/mars2.jpg')}" alt="Second slide">
+                            </div>
+                            <div class="carousel-item">
+                              <img class="d-block w-100" src="{url_for('static', filename='img/mars3.jpg')}" alt="Third slide">
+                            </div>
+                                                        <div class="carousel-item">
+                              <img class="d-block w-100" src="{url_for('static', filename='img/mars4.jpg')}" alt="Second slide">
+                            </div>
+                            <div class="carousel-item">
+                              <img class="d-block w-100" src="{url_for('static', filename='img/mars5.jpg')}" alt="Third slide">
+                            </div>
+                          </div>
+                          <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                          </a>
+                          <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                          </a>
+                        </div>
+
+                      </body>
+                    </html>"""
 
 
 if __name__ == '__main__':
