@@ -2,82 +2,76 @@ from config_dc import TOKEN, API_KEY
 import discord
 from discord.ext import commands
 from requests import request
-from pprint import pprint
+import emoji, random
 intents = discord.Intents.default()
 intents.members = True
-places = dict()
+ans = set()
+emodjies = emoji.EMOJI_UNICODE_ENGLISH
+for k, v in emodjies.items():
+    ans.add(v[0])
+ans = list(ans)
+users = dict()
 
 
 class RandomThings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='help_bot')
-    async def help_bot(self, ctx):
-        await ctx.send('Commands:\n'
-                       '"#!place" for change weather forecast location\n'
-                       '"#!current" for give a now weather forecast\n'
-                       '"#!forecast <day>" to get weather forecast for several days')
+    @commands.command(name='start')
+    async def start(self, ctx):
+        random.shuffle(ans)
+        smiles_in_game = ans[:random.randrange(50, 150)]
+        users[str(ctx.author)] = [smiles_in_game, 0, 0]
+        await ctx.send(f'The game started')
 
-    @commands.command(name='place')
-    async def set_place(self, ctx, place):
-        places[str(ctx.author)] = place
-        await ctx.send(f'Place changed to {place}')
+    @commands.command(name='stop')
+    async def forecast(self, ctx):
+        del users[str(ctx.author)]
+        await ctx.send("You can play again")
 
-    @commands.command(name='current')
-    async def current(self, ctx):
-        if str(ctx.author) not in places:
-            await ctx.send("Please, select the location of the weather forecast")
-        else:
-            response = request(
-                method='GET',
-                url='http://api.weatherstack.com/current',
-                params={
-                    'access_key': API_KEY,
-                    'query': places[str(ctx.author)]
-                }
-            )
-            if response.status_code == 200:
-                response = response.json()
-                d, t = response["location"]["localtime"].split()
-                await ctx.send(f'Current weather in {response["location"]["name"]} today {d} at time {t}:\n'
-                               f'Temperature: {response["current"]["temperature"]},\n'
-                               f'Pressure: {response["current"]["pressure"]},\n'
-                               f'Humidity: {response["current"]["humidity"]},\n'
-                               f'{response["current"]["weather_descriptions"][0]},\n'
-                               f'Wind {response["current"]["wind_dir"]}, {response["current"]["wind_speed"]} m/s.')
+    async def on_message(self, message):
+        if message.author == self.bot.user:
+            return
+        try:
+            y = users[str(message.author)][1]
+            b = users[str(message.author)][2]
+            if len(users[str(message.author)][0]) <= 1:
+                await message.dm_channel.send(f"Emoticons are over\n"
+                                              f"Score: You {y} Bot {b}\n"
+                                              f"{'You' if y > b else 'Bot'} win!")
+                del users[str(message.author)]
             else:
-                await ctx.send("Please select the existing location")
-
-    @commands.command(name='forecast')
-    async def forecast(self, ctx, days):
-        if str(ctx.author) not in places:
-            await ctx.send("Please, select the location of the weather forecast")
-        else:
-            response = request(
-                method='GET',
-                url='http://api.weatherstack.com/current',
-                params={
-                    'access_key': API_KEY,
-                    'query': places[str(ctx.author)],
-                    'forecast_days': int(days),
-                    'hourly': 1
-                }
-            )
-            if response.status_code == 200:
-                response = response.json()
-                ans = ''
-                pprint(response)
-                for i in response["forecast"]:
-                    ans += f'Weather forecast in {response["location"]["name"]} for {response["forecast"][i]["date"]}:\n' + \
-                           f'Temperature: {response["forecast"][i]["avgtemp"]},\n' + \
-                           f'Pressure: {response["forecast"][i]["hourly"][0]["pressure"]},\n' + \
-                           f'Humidity: {response["forecast"][i]["hourly"][0]["humidity"]},\n' + \
-                           f'{response["forecast"][i]["hourly"][0]["weather_descriptions"][0]},\n' + \
-                           f'Wind {response["forecast"][i]["hourly"][0]["wind_dir"]}, {response["forecast"][i]["hourly"][0]["wind_speed"]} m/s.\n\n'
-                await ctx.send(ans)
-            else:
-                await ctx.send("Please select the existing location")
+                number = int(message.content)
+                if number >= len(users[str(message.author)][0]):
+                    your_emoji = users[str(message.author)][0][len(users[str(message.author)][0]) % number]
+                    bot_emoji = random.randrange(len(users[str(message.author)][0]))
+                    if your_emoji > users[str(message.author)][0][bot_emoji]:
+                        users[str(message.author)][1] += 1
+                    else:
+                        users[str(message.author)][2] += 1
+                    y = users[str(message.author)][1]
+                    b = users[str(message.author)][2]
+                    await message.dm_channel.send(f"Your emoji {your_emoji}\n"
+                                                  f"Bot emoji {users[str(message.author)][0][bot_emoji]}\n"
+                                                  f"Score: You {y} Bot {b}\n")
+                    del users[str(message.author)][0][len(users[str(message.author)][0]) % number]
+                    del users[str(message.author)][0][bot_emoji - 1]
+                else:
+                    your_emoji = users[str(message.author)][0][number]
+                    bot_emoji = random.randrange(len(users[str(message.author)][0]))
+                    if your_emoji > users[str(message.author)][0][bot_emoji]:
+                        users[str(message.author)][1] += 1
+                    else:
+                        users[str(message.author)][2] += 1
+                    y = users[str(message.author)][1]
+                    b = users[str(message.author)][2]
+                    await message.dm_channel.send(f"Your emoji {your_emoji}\n"
+                                                  f"Bot emoji {users[str(message.author)][0][bot_emoji]}\n"
+                                                  f"Score: You {y} Bot {b}\n")
+                    del users[str(message.author)][0][number]
+                    del users[str(message.author)][0][bot_emoji - 1]
+        except:
+            await message.dm_channel.send("Please, send correct number")
 
 
 bot = commands.Bot(command_prefix='#!', intents=intents)
